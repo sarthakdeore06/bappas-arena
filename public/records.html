@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Records — Bappa's Arena | AH Society Mitra Mandal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐘</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-emblem">🐘</div>
+      <div class="brand-text"><div class="brand-title">Bappa's Arena</div><div class="brand-sub">AH Society Mitra Mandal</div></div>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html" data-page="index.html">Home</a>
+      <a href="dashboard.html" data-page="dashboard.html">Dashboard</a>
+      <a href="participants.html" data-page="participants.html">Participants</a>
+      <a href="games.html" data-page="games.html">Games</a>
+      <a href="results.html" data-page="results.html">Results</a>
+      <a href="leaderboard.html" data-page="leaderboard.html">Leaderboard</a>
+      <a href="records.html" data-page="records.html">Records</a>
+      <a href="memories.html" data-page="memories.html">Memories</a>
+      <a href="login.html" data-page="login.html" class="guest-only">Admin Login</a>
+      <a href="#" id="logout-btn" class="admin-only btn btn-sm btn-outline">Logout</a>
+    </nav>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">FESTIVAL HISTORY</div>
+        <h2>Yearly Records</h2>
+        <p class="section-desc">Browse participants, games and results from any previous Ganapati festival year.</p>
+      </div>
+      <select class="form-control filter-field filter-field--compact" id="year-select"></select>
+    </div>
+
+    <div class="stats-grid record-stats" id="record-stats"></div>
+
+    <div class="glass-card" style="padding:20px; margin-top:20px;">
+      <div class="card-toolbar">
+        <div class="toolbar-filters">
+          <button class="btn btn-sm btn-outline tab-btn active" data-tab="participants">🧑‍🤝‍🧑 Participants</button>
+          <button class="btn btn-sm btn-outline tab-btn" data-tab="games">🎮 Games</button>
+          <button class="btn btn-sm btn-outline tab-btn" data-tab="results">🏅 Results</button>
+        </div>
+      </div>
+      <div id="records-content"><div class="loader-wrap"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>🙏 <strong>Ganpati Bappa Morya!</strong></p>
+    <p>Bappa's Arena — Society Ganapati Games Portal · Hosted by <strong>AH Society Mitra Mandal</strong></p>
+    <p style="font-size:0.75rem; opacity:0.6;">&copy; <span id="footer-year"></span> AH Society Mitra Mandal. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/records.js"></script>
+<script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

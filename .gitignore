@@ -1,0 +1,6 @@
+node_modules/
+.env
+public/uploads/memories/*
+!public/uploads/memories/.gitkeep
+.DS_Store
+npm-debug.log

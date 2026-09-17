@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bappa's Arena — Society Ganapati Games Portal | AH Society Mitra Mandal</title>
+<meta name="description" content="Official Ganapati festival games portal of AH Society Mitra Mandal — participants, games, results, leaderboards and festival memories.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐘</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-emblem">🐘</div>
+      <div class="brand-text">
+        <div class="brand-title">Bappa's Arena</div>
+        <div class="brand-sub">AH Society Mitra Mandal</div>
+      </div>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html" data-page="index.html">Home</a>
+      <a href="dashboard.html" data-page="dashboard.html">Dashboard</a>
+      <a href="participants.html" data-page="participants.html">Participants</a>
+      <a href="games.html" data-page="games.html">Games</a>
+      <a href="results.html" data-page="results.html">Results</a>
+      <a href="leaderboard.html" data-page="leaderboard.html">Leaderboard</a>
+      <a href="records.html" data-page="records.html">Records</a>
+      <a href="memories.html" data-page="memories.html">Memories</a>
+      <a href="login.html" data-page="login.html" class="guest-only">Admin Login</a>
+      <a href="#" id="logout-btn" class="admin-only btn btn-sm btn-outline">Logout</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="decor-layer">
+    <div class="mandala-ring m1"></div>
+    <div class="mandala-ring m2"></div>
+    <div class="diya d1"></div>
+    <div class="diya d2"></div>
+    <div class="diya d3"></div>
+    <div class="diya d4"></div>
+    <div class="diya d5"></div>
+    <div id="hero-particles"></div>
+  </div>
+  <div class="container">
+    <div class="hero-pandal">AH SOCIETY MITRA MANDAL PRESENTS</div>
+    <span class="hero-year-badge" id="hero-year-badge">🪔 Festival Year —</span>
+    <h1>Bappa's Arena</h1>
+    <p class="hero-tagline">The official Ganapati Games Portal of our housing society — register participants, track every game, and celebrate our champions, together as one Mandal.</p>
+    <div class="hero-actions">
+      <a href="leaderboard.html" class="btn btn-primary">🏆 View Leaderboard</a>
+      <a href="games.html" class="btn btn-outline">🎮 See Games Schedule</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">THIS FESTIVAL AT A GLANCE</div>
+        <h2>Ganapati Games — Live Snapshot</h2>
+      </div>
+    </div>
+    <div class="stats-grid" id="home-stats">
+      <div class="loader-wrap" style="grid-column: 1/-1;"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="section-head team-head">
+      <div>
+        <div class="eyebrow">OUR SOCIETY SUPPORT</div>
+        <h2>Our Society Teams</h2>
+      </div>
+    </div>
+    <div class="team-grid">
+      <div class="team-card glass-card reveal">
+        <div class="team-icon">💰</div>
+        <h3>Budget Team</h3>
+        <ul class="team-members">
+          <li>Sarthak Nikam</li>
+          <li>Prashant</li>
+          <li>Nachiket</li>
+        </ul>
+      </div>
+      <div class="team-card glass-card reveal">
+        <div class="team-icon">🏛️</div>
+        <h3>Management Team</h3>
+        <ul class="team-members">
+          <li>Krushna</li>
+          <li>Rahul</li>
+          <li>Shravani</li>
+        </ul>
+      </div>
+      <div class="team-card glass-card reveal">
+        <div class="team-icon">🎉</div>
+        <h3>Event Team</h3>
+        <ul class="team-members">
+          <li>Avani</li>
+          <li>Apurva</li>
+          <li>Jagruti</li>
+        </ul>
+      </div>
+      <div class="team-card glass-card reveal">
+        <div class="team-icon">📱</div>
+        <h3>Social Media Team</h3>
+        <ul class="team-members">
+          <li>Sarthak Deore</li>
+          <li>Chaitanya Patil</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="festive-divider">🕉️</div>
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">EVERYTHING YOU NEED</div>
+        <h2>What Bappa's Arena Offers</h2>
+        <p class="section-desc">A complete, easy-to-use portal for organizers and residents to manage every part of our Ganapati games celebration.</p>
+      </div>
+    </div>
+    <div class="grid grid-4">
+      <div class="glass-card info-card reveal">
+        <div class="stat-icon">🧑‍🤝‍🧑</div>
+        <h3>Participant Management</h3>
+        <p style="color:var(--text-muted); font-size:0.88rem;">Register children, adults and open-category participants with full profiles and game history.</p>
+      </div>
+      <div class="glass-card info-card reveal">
+        <div class="stat-icon">🎯</div>
+        <h3>Game Scheduling</h3>
+        <p style="color:var(--text-muted); font-size:0.88rem;">Plan games with date, time, venue and live status — upcoming, ongoing or completed.</p>
+      </div>
+      <div class="glass-card info-card reveal">
+        <div class="stat-icon">🏅</div>
+        <h3>Results &amp; Medals</h3>
+        <p style="color:var(--text-muted); font-size:0.88rem;">Enter scores and ranks — Gold, Silver and Bronze winners are calculated automatically.</p>
+      </div>
+      <div class="glass-card info-card reveal">
+        <div class="stat-icon">📸</div>
+        <h3>Festival Memories</h3>
+        <p style="color:var(--text-muted); font-size:0.88rem;">A beautiful photo gallery preserving every year's celebration for the whole Mandal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="glass-card" style="padding:34px; text-align:center;">
+      <h2 style="margin-bottom:10px;">Ganpati Bappa Morya! 🙏</h2>
+      <p class="section-desc" style="margin:0 auto 22px;">Every game, every score, every winner — a record of our society's shared joy during Ganeshotsav. Explore this year's leaderboard or browse memories from festivals past.</p>
+      <div class="hero-actions">
+        <a href="records.html" class="btn btn-primary">📜 Browse Past Records</a>
+        <a href="memories.html" class="btn btn-outline">🖼️ Festival Gallery</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>🙏 <strong>Ganpati Bappa Morya!</strong></p>
+    <p>Bappa's Arena — Society Ganapati Games Portal · Hosted by <strong>AH Society Mitra Mandal</strong></p>
+    <p style="font-size:0.75rem; opacity:0.6;">&copy; <span id="footer-year"></span> AH Society Mitra Mandal. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/main.js"></script>
+<script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
