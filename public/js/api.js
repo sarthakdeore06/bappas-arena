@@ -156,9 +156,15 @@ function loaderHTML() {
 }
 
 function badgeForCategory(cat) {
-  const map = { Children: 'badge-children', Adults: 'badge-adults', Open: 'badge-open' };
+  const map = { Children: 'badge-children', Teenagers: 'badge-teenagers', Adults: 'badge-adults' };
   return `<span class="badge ${map[cat] || ''}">${cat}</span>`;
 }
+
+const categoryAgeRanges = {
+  Children: { min: 0, max: 12, label: '0-12 years' },
+  Teenagers: { min: 13, max: 17, label: '13-17 years' },
+  Adults: { min: 18, max: 120, label: '18 years and above' },
+};
 
 function badgeForStatus(status) {
   const map = { Upcoming: 'badge-upcoming', Ongoing: 'badge-ongoing', Completed: 'badge-completed' };

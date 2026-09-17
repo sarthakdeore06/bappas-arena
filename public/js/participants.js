@@ -140,7 +140,9 @@ async function submitParticipantForm(e) {
   let valid = true;
   const setErr = (fieldId, isErr) => document.getElementById(fieldId).closest('.form-group').classList.toggle('has-error', isErr);
   setErr('p-name', !name); if (!name) valid = false;
-  setErr('p-age', !age || age < 1); if (!age || age < 1) valid = false;
+  const ageRange = categoryAgeRanges[category];
+  const invalidAge = !age || !ageRange || Number(age) < ageRange.min || Number(age) > ageRange.max;
+  setErr('p-age', invalidAge); if (invalidAge) valid = false;
   setErr('p-category', !category); if (!category) valid = false;
   setErr('p-contact-name', !contactName); if (!contactName) valid = false;
   if (!valid) { toast('Please fix the highlighted fields.', 'error'); return; }

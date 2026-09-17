@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
+const { categoryAgeRanges, isAgeEligible } = require('../utils/categories');
 
 const participantSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    age: { type: Number, required: true, min: 1, max: 120 },
+    age: { type: Number, required: true, min: 0, max: 120 },
     category: {
       type: String,
       required: true,
-      enum: ['Children', 'Adults', 'Open'],
+      enum: Object.keys(categoryAgeRanges),
     },
     contactName: { type: String, required: true, trim: true }, // contact / guardian name
     contactPhone: { type: String, trim: true },
@@ -16,6 +17,10 @@ const participantSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+participantSchema.path('age').validate(function (age) {
+  return isAgeEligible(this.category, age);
+}, 'Age does not match the selected category.');
 
 participantSchema.index({ name: 'text' });
 

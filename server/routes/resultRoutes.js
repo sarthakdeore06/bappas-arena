@@ -3,6 +3,7 @@ const Result = require('../models/Result');
 const Game = require('../models/Game');
 const Participant = require('../models/Participant');
 const { protect } = require('../middleware/authMiddleware');
+const { isAgeEligible } = require('../utils/categories');
 
 const router = express.Router();
 
@@ -58,6 +59,9 @@ router.post('/', protect, async (req, res, next) => {
 
     const participantDoc = await Participant.findById(participant);
     if (!participantDoc) return res.status(404).json({ message: 'Selected participant does not exist.' });
+    if (gameDoc.category !== participantDoc.category || !isAgeEligible(gameDoc.category, participantDoc.age)) {
+      return res.status(400).json({ message: 'This participant is not eligible for the selected game category.' });
+    }
 
     // Prevent invalid duplicate: same participant already has a result in this game
     const existing = await Result.findOne({ game, participant });

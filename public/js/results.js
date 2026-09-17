@@ -7,7 +7,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadGamesForSelect();
   await loadParticipantsForSelect();
 
-  document.getElementById('game-select').addEventListener('change', (e) => loadResultsForGame(e.target.value));
+  document.getElementById('game-select').addEventListener('change', (e) => {
+    updateParticipantOptions(e.target.value);
+    loadResultsForGame(e.target.value);
+  });
   document.getElementById('add-result-btn').addEventListener('click', () => {
     if (!requireAdmin()) return;
     openResultModal();
@@ -31,12 +34,22 @@ async function loadGamesForSelect() {
 async function loadParticipantsForSelect() {
   try {
     allParticipantsR = await apiFetch('/participants');
-    document.getElementById('r-participant').innerHTML =
-      `<option value="">Select participant</option>` +
-      allParticipantsR.map((p) => `<option value="${p._id}">${p.name} (${p.category})</option>`).join('');
+    updateParticipantOptions();
   } catch (err) {
     toast('Could not load participants: ' + err.message, 'error');
   }
+}
+
+function updateParticipantOptions(gameId) {
+  const game = allGamesR.find((g) => g._id === gameId);
+  const eligible = game ? allParticipantsR.filter((p) => p.category === game.category) : [];
+  const range = game ? categoryAgeRanges[game.category] : null;
+  document.getElementById('r-participant').innerHTML =
+    `<option value="">Select participant</option>` +
+    eligible.map((p) => `<option value="${p._id}">${p.name} (${p.age})</option>`).join('');
+  document.getElementById('result-eligibility-hint').textContent = range
+    ? `Eligible participants: ${game.category} (${range.label}).`
+    : 'Select a game to show eligible participants.';
 }
 
 async function loadResultsForGame(gameId) {
@@ -140,6 +153,7 @@ function openResultModal(r) {
   document.getElementById('result-modal-title').textContent = r ? 'Edit Result' : 'Add Result';
   document.getElementById('result-id').value = r ? r._id : '';
   document.getElementById('r-game').value = r ? r.game._id || r.game : (document.getElementById('game-select').value || '');
+  updateParticipantOptions(document.getElementById('r-game').value);
   document.getElementById('r-participant').value = r ? (r.participant._id || r.participant) : '';
   document.getElementById('r-score').value = r ? r.score : '';
   document.getElementById('r-rank').value = r ? r.rank : '';

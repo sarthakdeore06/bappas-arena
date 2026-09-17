@@ -52,9 +52,9 @@
           <input type="text" class="form-control filter-field filter-field--wide" id="search-input" placeholder="🔍 Search by name...">
           <select class="form-control filter-field filter-field--compact" id="category-filter">
             <option value="All">All Categories</option>
-            <option value="Children">Children</option>
-            <option value="Adults">Adults</option>
-            <option value="Open">Open</option>
+            <option value="Children">Children (0-12 years)</option>
+            <option value="Teenagers">Teenagers (13-17 years)</option>
+            <option value="Adults">Adults (18 years and above)</option>
           </select>
           <select class="form-control filter-field filter-field--compact" id="year-filter"></select>
         </div>
@@ -82,16 +82,16 @@
       <div class="form-row">
         <div class="form-group">
           <label for="p-age">Age *</label>
-          <input type="number" id="p-age" class="form-control" min="1" max="120" placeholder="e.g. 10" required>
+          <input type="number" id="p-age" class="form-control" min="0" max="120" placeholder="e.g. 10" required>
           <div class="form-error">Please enter a valid age.</div>
         </div>
         <div class="form-group">
           <label for="p-category">Category *</label>
           <select id="p-category" class="form-control" required>
             <option value="">Select category</option>
-            <option value="Children">Children</option>
-            <option value="Adults">Adults</option>
-            <option value="Open">Open</option>
+            <option value="Children">Children (0-12 years)</option>
+            <option value="Teenagers">Teenagers (13-17 years)</option>
+            <option value="Adults">Adults (18 years and above)</option>
           </select>
           <div class="form-error">Please select a category.</div>
         </div>

@@ -450,7 +450,7 @@ tbody tr:last-child td { border-bottom: none; }
 }
 .badge-children { background: rgba(245,121,31,0.18); color: #ffb066; }
 .badge-adults { background: rgba(212,175,55,0.18); color: var(--gold-300); }
-.badge-open { background: rgba(63,174,106,0.18); color: #7fdda3; }
+.badge-teenagers { background: rgba(63,174,106,0.18); color: #7fdda3; }
 .badge-upcoming { background: rgba(224,166,55,0.18); color: #f0c46a; }
 .badge-ongoing { background: rgba(63,174,106,0.18); color: #7fdda3; }
 .badge-completed { background: rgba(255,255,255,0.12); color: var(--text-muted); }
