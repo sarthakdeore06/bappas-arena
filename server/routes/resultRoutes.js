@@ -6,14 +6,6 @@ const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Assigns Gold/Silver/Bronze automatically based on rank within a game
-const positionForRank = (rank) => {
-  if (rank === 1) return 'Gold';
-  if (rank === 2) return 'Silver';
-  if (rank === 3) return 'Bronze';
-  return 'Participant';
-};
-
 // @route   GET /api/results?game=&year=
 router.get('/', async (req, res, next) => {
   try {
@@ -26,7 +18,7 @@ router.get('/', async (req, res, next) => {
     const results = await Result.find(filter)
       .populate('game', 'name category date venue status year')
       .populate('participant', 'name category')
-      .sort({ rank: 1 });
+      .sort({ game: 1, ageGroup: 1, rank: 1 });
     res.json(results);
   } catch (err) {
     next(err);
@@ -38,7 +30,7 @@ router.get('/game/:gameId', async (req, res, next) => {
   try {
     const results = await Result.find({ game: req.params.gameId })
       .populate('participant', 'name category')
-      .sort({ rank: 1 });
+      .sort({ ageGroup: 1, rank: 1 });
     res.json(results);
   } catch (err) {
     next(err);
@@ -48,32 +40,38 @@ router.get('/game/:gameId', async (req, res, next) => {
 // @route   POST /api/results  (admin only)
 router.post('/', protect, async (req, res, next) => {
   try {
-    const { game, participant, score, rank, remarks } = req.body;
-    if (!game || !participant || score === undefined || !rank) {
+    const { game, ageGroup, winnerName, participant, score, position, remarks } = req.body;
+    if (!game || !ageGroup || !winnerName || !position) {
       return res.status(400).json({ message: 'Please fill all required fields.' });
+    }
+    if (!['Children', 'Teenage', 'Adult'].includes(ageGroup) || !['Gold', 'Silver', 'Bronze'].includes(position)) {
+      return res.status(400).json({ message: 'Choose a valid age group and medal.' });
     }
 
     const gameDoc = await Game.findById(game);
     if (!gameDoc) return res.status(404).json({ message: 'Selected game does not exist.' });
 
-    const participantDoc = await Participant.findById(participant);
-    if (!participantDoc) return res.status(404).json({ message: 'Selected participant does not exist.' });
-    if (gameDoc.category !== participantDoc.category) {
-      return res.status(400).json({ message: 'This participant is not eligible for the selected game category.' });
+    if (participant) {
+      const participantDoc = await Participant.findById(participant);
+      if (!participantDoc) return res.status(404).json({ message: 'Selected participant does not exist.' });
+      if (participantDoc.category !== ageGroup) {
+        return res.status(400).json({ message: 'The participant age group must match the result age group.' });
+      }
     }
 
-    // Prevent invalid duplicate: same participant already has a result in this game
-    const existing = await Result.findOne({ game, participant });
+    const existing = await Result.findOne({ game, ageGroup, position });
     if (existing) {
-      return res.status(400).json({ message: 'This participant already has a result recorded for this game.' });
+      return res.status(400).json({ message: `A ${position} winner is already recorded for this game and age group.` });
     }
 
     const result = await Result.create({
       game,
+      ageGroup,
+      winnerName: winnerName.trim(),
       participant,
-      score,
-      rank,
-      position: positionForRank(Number(rank)),
+      score: Number(score || 0),
+      rank: { Gold: 1, Silver: 2, Bronze: 3 }[position],
+      position,
       remarks,
       year: gameDoc.year,
     });
@@ -92,12 +90,9 @@ router.post('/', protect, async (req, res, next) => {
 // @route   PUT /api/results/:id  (admin only)
 router.put('/:id', protect, async (req, res, next) => {
   try {
-    const { score, rank, remarks } = req.body;
-    const update = { score, remarks };
-    if (rank) {
-      update.rank = rank;
-      update.position = positionForRank(Number(rank));
-    }
+    const { ageGroup, winnerName, participant, score, position, remarks } = req.body;
+    const update = { ageGroup, winnerName: winnerName && winnerName.trim(), participant: participant || undefined, score: Number(score || 0), position, remarks };
+    if (position) update.rank = { Gold: 1, Silver: 2, Bronze: 3 }[position];
     const result = await Result.findByIdAndUpdate(req.params.id, update, {
       new: true,
       runValidators: true,

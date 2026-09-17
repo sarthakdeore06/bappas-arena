@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./server/config/db');
 const seedAdmin = require('./server/utils/seedAdmin');
+const Result = require('./server/models/Result');
 const { notFound, errorHandler } = require('./server/middleware/errorHandler');
 
 const app = express();
@@ -23,7 +24,6 @@ app.use('/api/games', require('./server/routes/gameRoutes'));
 app.use('/api/results', require('./server/routes/resultRoutes'));
 app.use('/api/leaderboard', require('./server/routes/leaderboardRoutes'));
 app.use('/api/dashboard', require('./server/routes/dashboardRoutes'));
-app.use('/api/records', require('./server/routes/recordRoutes'));
 app.use('/api/memories', require('./server/routes/memoryRoutes'));
 app.use('/api/settings', require('./server/routes/settingsRoutes'));
 app.use('/api/budget', require('./server/routes/budgetRoutes'));
@@ -42,6 +42,7 @@ const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   await connectDB();
+  await Result.syncIndexes();
   await seedAdmin();
   app.listen(PORT, () => {
     console.log(`Bappa's Arena server running on http://localhost:${PORT}`);

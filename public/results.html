@@ -20,11 +20,9 @@
     <nav class="main-nav" id="main-nav">
       <a href="index.html" data-page="index.html">Home</a>
       <a href="dashboard.html" data-page="dashboard.html">Dashboard</a>
-      <a href="participants.html" data-page="participants.html">Participants</a>
       <a href="games.html" data-page="games.html">Games</a>
       <a href="results.html" data-page="results.html">Results</a>
       <a href="leaderboard.html" data-page="leaderboard.html">Leaderboard</a>
-      <a href="records.html" data-page="records.html">Records</a>
       <a href="memories.html" data-page="memories.html">Memories</a>
       <a href="login.html" data-page="login.html" class="guest-only">Admin Login</a>
       <a href="#" id="logout-btn" class="admin-only btn btn-sm btn-outline">Logout</a>
@@ -38,7 +36,7 @@
       <div>
         <div class="eyebrow">SCORING &amp; MEDALS</div>
         <h2>Results</h2>
-        <p class="section-desc">Select a game to view or record its results. Gold, Silver and Bronze are assigned automatically from rank.</p>
+        <p class="section-desc">Select a game to view or record one Gold, Silver and Bronze winner for every age group.</p>
       </div>
       <div class="action-group">
         <button class="btn btn-outline btn-sm" id="print-btn">🖨️ Print Winners</button>
@@ -57,7 +55,7 @@
     <div id="podium-wrap"></div>
 
     <div class="glass-card" id="results-card" style="padding:20px; margin-top:20px;">
-      <h3 class="no-print" style="margin-bottom:14px;">All Results for Selected Game</h3>
+      <h3 class="no-print" style="margin-bottom:14px;">Medal Results by Age Group</h3>
       <div id="results-table-wrap">
         <div class="empty-state">
           <span class="empty-icon">🎯</span>
@@ -82,25 +80,25 @@
         <select id="r-game" class="form-control" required></select>
         <div class="form-error">Please select a game.</div>
       </div>
-      <div class="form-group">
-        <label for="r-participant">Participant *</label>
-        <select id="r-participant" class="form-control" required></select>
-        <div class="form-hint" id="result-eligibility-hint">Select a game to show eligible participants.</div>
-        <div class="form-error">Please select a participant.</div>
-      </div>
       <div class="form-row">
         <div class="form-group">
-          <label for="r-score">Score *</label>
-          <input type="number" id="r-score" class="form-control" step="any" required>
-          <div class="form-error">Please enter a score.</div>
+          <label for="r-age-group">Age Group *</label>
+          <select id="r-age-group" class="form-control" required>
+            <option value="">Select age group</option><option value="Children">Children</option><option value="Teenage">Teenage</option><option value="Adult">Adult</option>
+          </select>
         </div>
         <div class="form-group">
-          <label for="r-rank">Rank *</label>
-          <input type="number" id="r-rank" class="form-control" min="1" required>
-          <div class="form-error">Please enter a valid rank.</div>
+          <label for="r-position">Medal *</label>
+          <select id="r-position" class="form-control" required>
+            <option value="">Select medal</option><option value="Gold">Gold</option><option value="Silver">Silver</option><option value="Bronze">Bronze</option>
+          </select>
         </div>
       </div>
-      <p class="form-hint">Rank 1 = 🥇 Gold, Rank 2 = 🥈 Silver, Rank 3 = 🥉 Bronze — assigned automatically.</p>
+      <div class="form-group">
+        <label for="r-winner-name">Winner's Name *</label>
+        <input type="text" id="r-winner-name" class="form-control" required>
+        <div class="form-error">Please enter the winner's name.</div>
+      </div>
       <div class="form-group">
         <label for="r-remarks">Remarks (optional)</label>
         <textarea id="r-remarks" class="form-control" rows="2" placeholder="e.g. Excellent performance"></textarea>

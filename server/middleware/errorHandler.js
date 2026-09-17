@@ -6,6 +6,10 @@ const notFound = (req, res, next) => {
 const errorHandler = (err, req, res, next) => {
   console.error(err);
 
+  if (err.name === 'MulterError' || err.code === 'LIMIT_FILE_SIZE' || err.message.startsWith('Only ')) {
+    return res.status(400).json({ message: err.message || 'The uploaded file could not be processed.' });
+  }
+
   // Duplicate key error from MongoDB (e.g. duplicate result for game+participant)
   if (err.code === 11000) {
     return res.status(400).json({

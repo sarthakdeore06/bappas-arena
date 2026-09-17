@@ -3,17 +3,16 @@ const mongoose = require('mongoose');
 const resultSchema = new mongoose.Schema(
   {
     game: { type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true },
+    ageGroup: { type: String, enum: ['Children', 'Teenage', 'Adult'], required: true },
+    winnerName: { type: String, required: true, trim: true },
     participant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Participant',
-      required: true,
     },
-    score: { type: Number, required: true },
-    rank: { type: Number, required: true, min: 1 },
+    score: { type: Number, default: 0 },
+    rank: { type: Number, required: true, min: 1, max: 3 },
     position: {
-      type: String,
-      enum: ['Gold', 'Silver', 'Bronze', 'Participant'],
-      default: 'Participant',
+      type: String, enum: ['Gold', 'Silver', 'Bronze'], required: true,
     },
     remarks: { type: String, trim: true },
     year: { type: Number, required: true },
@@ -21,7 +20,7 @@ const resultSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Prevent the same participant from having two results in the same game
-resultSchema.index({ game: 1, participant: 1 }, { unique: true });
+// There can be only one winner for each medal slot in a game and age group.
+resultSchema.index({ game: 1, ageGroup: 1, position: 1 }, { unique: true });
 
 module.exports = mongoose.model('Result', resultSchema);

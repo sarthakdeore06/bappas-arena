@@ -1,14 +1,11 @@
 /* Results management page */
 let allGamesR = [];
-let allParticipantsR = [];
 let currentGameResults = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadGamesForSelect();
-  await loadParticipantsForSelect();
 
   document.getElementById('game-select').addEventListener('change', (e) => {
-    updateParticipantOptions(e.target.value);
     loadResultsForGame(e.target.value);
   });
   document.getElementById('add-result-btn').addEventListener('click', () => {
@@ -29,26 +26,6 @@ async function loadGamesForSelect() {
   } catch (err) {
     toast('Could not load games: ' + err.message, 'error');
   }
-}
-
-async function loadParticipantsForSelect() {
-  try {
-    allParticipantsR = await apiFetch('/participants');
-    updateParticipantOptions();
-  } catch (err) {
-    toast('Could not load participants: ' + err.message, 'error');
-  }
-}
-
-function updateParticipantOptions(gameId) {
-  const game = allGamesR.find((g) => g._id === gameId);
-  const eligible = game ? allParticipantsR.filter((p) => p.category === game.category) : [];
-  document.getElementById('r-participant').innerHTML =
-    `<option value="">Select participant</option>` +
-    eligible.map((p) => `<option value="${p._id}">${p.name}</option>`).join('');
-  document.getElementById('result-eligibility-hint').textContent = game
-    ? `Eligible participants: ${game.category}.`
-    : 'Select a game to show eligible participants.';
 }
 
 async function loadResultsForGame(gameId) {
@@ -78,25 +55,27 @@ async function loadResultsForGame(gameId) {
 
 function renderPodium(results) {
   const podiumWrap = document.getElementById('podium-wrap');
-  const winners = { Gold: null, Silver: null, Bronze: null };
-  results.forEach((r) => { if (Object.prototype.hasOwnProperty.call(winners, r.position)) winners[r.position] = r; });
-
-  if (!winners.Gold && !winners.Silver && !winners.Bronze) {
+  if (!results.length) {
     podiumWrap.innerHTML = '';
     return;
   }
 
   const gameName = document.getElementById('game-select').selectedOptions[0]?.text || '';
+  const groups = ['Children', 'Teenage', 'Adult'];
+  const medals = { Gold: ['gold', '🥇'], Silver: ['silver', '🥈'], Bronze: ['bronze', '🥉'] };
 
   podiumWrap.innerHTML = `
     <div class="glass-card" style="padding:26px; text-align:center;">
       <div class="eyebrow">WINNERS</div>
       <h3 style="margin-bottom:0;">${gameName}</h3>
-      <div class="podium">
-        ${winners.Silver ? podiumItem(winners.Silver, 'silver', '🥈') : ''}
-        ${winners.Gold ? podiumItem(winners.Gold, 'gold', '🥇') : ''}
-        ${winners.Bronze ? podiumItem(winners.Bronze, 'bronze', '🥉') : ''}
-      </div>
+      ${groups.map((group) => {
+        const groupResults = results.filter((r) => r.ageGroup === group);
+        if (!groupResults.length) return '';
+        return `<h4 style="margin:24px 0 4px;">${group} Group</h4><div class="podium">${['Silver', 'Gold', 'Bronze'].map((medal) => {
+          const result = groupResults.find((r) => r.position === medal);
+          return result ? podiumItem(result, medals[medal][0], medals[medal][1]) : '';
+        }).join('')}</div>`;
+      }).join('')}
     </div>`;
 }
 
@@ -120,13 +99,12 @@ function renderResultsTable(results) {
   tableWrap.innerHTML = `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Rank</th><th>Participant</th><th>Score</th><th>Position</th><th>Remarks</th><th class="admin-only no-print">Actions</th></tr></thead>
+        <thead><tr><th>Age Group</th><th>Winner</th><th>Medal</th><th>Remarks</th><th class="admin-only no-print">Actions</th></tr></thead>
         <tbody>
           ${results.map((r) => `
             <tr>
-              <td>#${r.rank}</td>
-              <td>${r.participant ? r.participant.name : '—'}</td>
-              <td>${r.score}</td>
+              <td>${r.ageGroup}</td>
+              <td>${r.winnerName}</td>
               <td>${badgeForPosition(r.position)}</td>
               <td>${r.remarks || '—'}</td>
               <td class="admin-only no-print">
@@ -152,10 +130,9 @@ function openResultModal(r) {
   document.getElementById('result-modal-title').textContent = r ? 'Edit Result' : 'Add Result';
   document.getElementById('result-id').value = r ? r._id : '';
   document.getElementById('r-game').value = r ? r.game._id || r.game : (document.getElementById('game-select').value || '');
-  updateParticipantOptions(document.getElementById('r-game').value);
-  document.getElementById('r-participant').value = r ? (r.participant._id || r.participant) : '';
-  document.getElementById('r-score').value = r ? r.score : '';
-  document.getElementById('r-rank').value = r ? r.rank : '';
+  document.getElementById('r-age-group').value = r ? r.ageGroup : '';
+  document.getElementById('r-position').value = r ? r.position : '';
+  document.getElementById('r-winner-name').value = r ? r.winnerName : '';
   document.getElementById('r-remarks').value = r ? (r.remarks || '') : '';
 
   // when editing, game shouldn't change
@@ -169,17 +146,17 @@ async function submitResultForm(e) {
   e.preventDefault();
   const id = document.getElementById('result-id').value;
   const game = document.getElementById('r-game').value;
-  const participant = document.getElementById('r-participant').value;
-  const score = document.getElementById('r-score').value;
-  const rank = document.getElementById('r-rank').value;
+  const ageGroup = document.getElementById('r-age-group').value;
+  const position = document.getElementById('r-position').value;
+  const winnerName = document.getElementById('r-winner-name').value.trim();
   const remarks = document.getElementById('r-remarks').value.trim();
 
   let valid = true;
   const setErr = (fid, isErr) => document.getElementById(fid).closest('.form-group').classList.toggle('has-error', isErr);
   setErr('r-game', !game); if (!game) valid = false;
-  setErr('r-participant', !participant); if (!participant) valid = false;
-  setErr('r-score', score === ''); if (score === '') valid = false;
-  setErr('r-rank', !rank || rank < 1); if (!rank || rank < 1) valid = false;
+  setErr('r-age-group', !ageGroup); if (!ageGroup) valid = false;
+  setErr('r-position', !position); if (!position) valid = false;
+  setErr('r-winner-name', !winnerName); if (!winnerName) valid = false;
   if (!valid) { toast('Please fix the highlighted fields.', 'error'); return; }
 
   const btn = document.getElementById('result-submit-btn');
@@ -187,10 +164,10 @@ async function submitResultForm(e) {
 
   try {
     if (id) {
-      await apiFetch(`/results/${id}`, { method: 'PUT', body: { score: Number(score), rank: Number(rank), remarks } });
+      await apiFetch(`/results/${id}`, { method: 'PUT', body: { ageGroup, position, winnerName, remarks } });
       toast('Result updated successfully.', 'success');
     } else {
-      await apiFetch('/results', { method: 'POST', body: { game, participant, score: Number(score), rank: Number(rank), remarks } });
+      await apiFetch('/results', { method: 'POST', body: { game, ageGroup, position, winnerName, remarks } });
       toast('Result recorded successfully.', 'success');
     }
     document.getElementById('result-modal').classList.remove('open');

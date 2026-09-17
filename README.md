@@ -2,7 +2,7 @@
 
 **AH Society Mitra Mandal**
 
-A complete, premium full-stack web portal to manage your housing society's Ganapati festival games — participant registration, game scheduling, result entry with automatic medal calculation, leaderboards, year-wise festival records, and a festival photo gallery.
+A complete, premium full-stack web portal to manage your housing society's Ganapati festival games — participant-backed game scheduling, age-group medal results, leaderboards, and a festival photo gallery.
 
 Built with **plain HTML, CSS and vanilla JavaScript** on the frontend, and **Node.js + Express + MongoDB (Mongoose)** on the backend. No React, Vue, Angular, Tailwind, Bootstrap or TypeScript.
 
@@ -16,7 +16,6 @@ Built with **plain HTML, CSS and vanilla JavaScript** on the frontend, and **Nod
 - **Game management** — name, category, date, time, venue, status (Upcoming / Ongoing / Completed).
 - **Result management** — score, rank, remarks; Gold/Silver/Bronze auto-assigned from rank; duplicate results for the same participant+game are blocked.
 - **Leaderboards** — game-wise and overall, filterable by category and year, with a podium view.
-- **Festival records** — year-wise participants, games and results, kept separate per year.
 - **Admin panel** — JWT-based admin login; only admins can add/edit/delete; the public can browse everything read-only.
 - **Festival memories** — photo gallery with captions and event names; no private participant details are ever shown publicly.
 - **Extras** — search & filters, delete confirmations, form validation, loading states, toast notifications, empty states, CSV export, print-friendly winner lists.
@@ -34,11 +33,9 @@ bappas-arena/
 ├── public/                     # Static frontend (served by Express)
 │   ├── index.html               # Festival homepage
 │   ├── dashboard.html           # Admin dashboard
-│   ├── participants.html        # Participant management
 │   ├── games.html                # Game management
 │   ├── results.html              # Result entry
 │   ├── leaderboard.html          # Rankings
-│   ├── records.html              # Previous-year records
 │   ├── memories.html             # Photo gallery
 │   ├── login.html                # Admin login
 │   ├── css/
@@ -48,8 +45,8 @@ bappas-arena/
 │   │   ├── api.js                # Fetch wrapper, auth/session, toasts, CSV export
 │   │   ├── nav.js                 # Shared header/nav behaviour, admin-state toggling
 │   │   ├── particles.js           # Hero particle effect
-│   │   ├── main.js, dashboard.js, participants.js, games.js,
-│   │   │   results.js, leaderboard.js, records.js, memories.js, login.js
+│   │   ├── main.js, dashboard.js, games.js, results.js,
+│   │   │   leaderboard.js, memories.js, login.js
 │   └── uploads/memories/         # Uploaded festival photos (created automatically)
 └── server/
     ├── config/db.js              # MongoDB connection
@@ -67,7 +64,6 @@ bappas-arena/
     │   ├── resultRoutes.js
     │   ├── leaderboardRoutes.js
     │   ├── dashboardRoutes.js
-    │   ├── recordRoutes.js
     │   ├── memoryRoutes.js
     │   └── settingsRoutes.js
     ├── middleware/
@@ -144,8 +140,8 @@ npm run dev
 
 ## 🔑 Admin Access
 
-- Public visitors can browse the homepage, dashboard, games, leaderboard, records and memories gallery — **read-only**.
-- Only a logged-in admin (via `login.html`) can add, edit or delete participants, games, results and gallery photos.
+- Public visitors can browse the homepage, dashboard, games, leaderboard and memories gallery — **read-only**.
+- Only a logged-in admin (via `login.html`) can add, edit or delete games, results and gallery photos.
 - The admin session is a JWT stored in the browser's `localStorage` and sent as a `Bearer` token on every write request. It expires automatically based on `JWT_EXPIRES_IN`.
 
 ---
@@ -168,12 +164,11 @@ npm run dev
 All endpoints are prefixed with `/api`. Routes marked 🔒 require an admin `Authorization: Bearer <token>` header.
 
 - `POST /auth/login`, `GET /auth/me` 🔒, `PUT /auth/change-password` 🔒
-- `GET /participants`, `GET /participants/:id`, `POST /participants` 🔒, `PUT /participants/:id` 🔒, `DELETE /participants/:id` 🔒
 - `GET /games`, `GET /games/:id`, `POST /games` 🔒, `PUT /games/:id` 🔒, `DELETE /games/:id` 🔒
+- Internal participant APIs remain available for result eligibility and leaderboard aggregation.
 - `GET /results`, `GET /results/game/:gameId`, `POST /results` 🔒, `PUT /results/:id` 🔒, `DELETE /results/:id` 🔒
 - `GET /leaderboard/overall?year=&category=`
 - `GET /dashboard/stats?year=`, `GET /dashboard/years`
-- `GET /records/:year`
 - `GET /memories?year=`, `POST /memories` 🔒 (multipart/form-data), `DELETE /memories/:id` 🔒
 - `GET /settings`, `PUT /settings` 🔒
 
@@ -182,7 +177,7 @@ All endpoints are prefixed with `/api`. Routes marked 🔒 require an admin `Aut
 ## 🧩 Extending for Future Festivals
 
 1. In `.env`, bump `CURRENT_FESTIVAL_YEAR` (or update it via `PUT /api/settings` once logged in as admin) at the start of a new festival.
-2. Simply start adding new **Participants** and **Games** with the new year — old years' data is never modified, so every past festival's records, results and photos stay intact and are browsable from the **Records** page.
+2. Simply start adding new games and medal results with the new year — old years' data remains stored separately in MongoDB.
 3. Want an extra participant field, a new category, or a new game status? Add the field to the relevant Mongoose model in `server/models/`, adjust the matching route validation, and extend the form fields in the corresponding HTML/JS page — the rest of the stack (dashboard, leaderboard, exports) needs no changes since it reads live from the database.
 
 ---

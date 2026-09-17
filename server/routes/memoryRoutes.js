@@ -1,22 +1,11 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
+const mongoose = require('mongoose');
 const Memory = require('../models/Memory');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
-
-const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads', 'memories');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-    cb(null, unique);
-  },
-});
 
 const fileFilter = (req, file, cb) => {
   const allowed = {
@@ -28,7 +17,17 @@ const fileFilter = (req, file, cb) => {
   else cb(new Error('Only JPG, JPEG, PNG, GIF, MP4, MOV, and WebM files are allowed.'));
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 100 * 1024 * 1024, files: 20 } });
+const upload = multer({ storage: multer.memoryStorage(), fileFilter, limits: { fileSize: 100 * 1024 * 1024, files: 20 } });
+
+const getBucket = () => new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'memories' });
+
+const saveFile = (file) => new Promise((resolve, reject) => {
+  const bucket = getBucket();
+  const uploadStream = bucket.openUploadStream(file.originalname, { contentType: file.mimetype });
+  uploadStream.on('error', reject);
+  uploadStream.on('finish', () => resolve(uploadStream.id));
+  uploadStream.end(file.buffer);
+});
 
 // @route   GET /api/memories?year=
 router.get('/', async (req, res, next) => {
@@ -43,6 +42,19 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/:id/media', async (req, res, next) => {
+  try {
+    const memory = await Memory.findById(req.params.id);
+    if (!memory) return res.status(404).json({ message: 'Memory not found.' });
+    res.type(memory.contentType);
+    getBucket().openDownloadStream(memory.mediaId).on('error', () => {
+      if (!res.headersSent) res.status(404).json({ message: 'Memory file not found.' });
+    }).pipe(res);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // @route   POST /api/memories  (admin only) - multipart form-data: media[], caption, eventName, year
 router.post('/', protect, upload.array('media', 20), async (req, res, next) => {
   try {
@@ -50,13 +62,29 @@ router.post('/', protect, upload.array('media', 20), async (req, res, next) => {
     const { caption, eventName, year } = req.body;
     if (!year) return res.status(400).json({ message: 'Festival year is required.' });
 
-    const memories = await Memory.create(req.files.map((file) => ({
-      imageUrl: `/uploads/memories/${file.filename}`,
-      mediaType: file.mimetype.startsWith('video/') ? 'video' : 'image',
-      caption,
-      eventName,
-      year,
-    })));
+    const memories = [];
+    const mediaIds = [];
+    try {
+      for (const file of req.files) {
+        const mediaId = await saveFile(file);
+        mediaIds.push(mediaId);
+        const memory = await Memory.create({
+          mediaId,
+          imageUrl: `/api/memories/placeholder/media`,
+          contentType: file.mimetype,
+          mediaType: file.mimetype.startsWith('video/') ? 'video' : 'image',
+          caption,
+          eventName,
+          year,
+        });
+        memory.imageUrl = `/api/memories/${memory._id}/media`;
+        await memory.save();
+        memories.push(memory);
+      }
+    } catch (err) {
+      await Promise.all(mediaIds.map((mediaId) => getBucket().delete(mediaId).catch(() => {})));
+      throw err;
+    }
     res.status(201).json(memories);
   } catch (err) {
     next(err);
@@ -69,8 +97,7 @@ router.delete('/:id', protect, async (req, res, next) => {
     const memory = await Memory.findByIdAndDelete(req.params.id);
     if (!memory) return res.status(404).json({ message: 'Photo not found.' });
 
-    const filePath = path.join(__dirname, '..', '..', 'public', memory.imageUrl);
-    fs.unlink(filePath, () => {});
+    await getBucket().delete(memory.mediaId);
 
     res.json({ message: 'Photo deleted successfully.' });
   } catch (err) {
