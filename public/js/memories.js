@@ -1,4 +1,4 @@
-/* Festival photo gallery page */
+/* Festival memories gallery page */
 const currentYearM = new Date().getFullYear();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -38,17 +38,19 @@ async function loadGallery() {
   try {
     const memories = await apiFetch(`/memories?${params.toString()}`);
     if (!memories.length) {
-      wrap.innerHTML = emptyStateHTML('📸', 'No photos yet', 'Festival photographs uploaded by the organizers will appear here.');
+      wrap.innerHTML = emptyStateHTML('📸', 'No memories yet', 'Festival photos and videos uploaded by the organizers will appear here.');
       return;
     }
     wrap.innerHTML = `<div class="gallery-grid">${memories.map((m) => `
       <div class="glass-card gallery-item reveal in-view">
-        <img src="${m.imageUrl}" alt="${m.eventName || 'Festival memory'}" loading="lazy">
+        ${m.mediaType === 'video'
+          ? `<video src="${m.imageUrl}" controls preload="metadata" aria-label="${m.eventName || 'Festival memory'}"></video>`
+          : `<img src="${m.imageUrl}" alt="${m.eventName || 'Festival memory'}" loading="lazy">`}
         <div class="gallery-caption">
           ${m.eventName ? `<span class="event-name">${m.eventName}</span>` : ''}
           <span>${m.caption || ''}</span>
         </div>
-        <button class="delete-photo admin-only" data-id="${m._id}" title="Delete photo">&times;</button>
+        <button class="delete-photo admin-only" data-id="${m._id}" title="Delete memory">&times;</button>
       </div>`).join('')}</div>`;
 
     wrap.querySelectorAll('.delete-photo').forEach((btn) => btn.addEventListener('click', () => deletePhoto(btn.dataset.id)));
@@ -59,20 +61,20 @@ async function loadGallery() {
 
 async function submitUpload(e) {
   e.preventDefault();
-  const fileInput = document.getElementById('m-photo');
+  const fileInput = document.getElementById('m-media');
   const eventName = document.getElementById('m-event').value.trim();
   const caption = document.getElementById('m-caption').value.trim();
   const year = document.getElementById('m-year').value;
 
   if (!fileInput.files.length) {
     fileInput.closest('.form-group').classList.add('has-error');
-    toast('Please choose a photo to upload.', 'error');
+    toast('Please choose at least one photo or video to upload.', 'error');
     return;
   }
   fileInput.closest('.form-group').classList.remove('has-error');
 
   const formData = new FormData();
-  formData.append('photo', fileInput.files[0]);
+  Array.from(fileInput.files).forEach((file) => formData.append('media', file));
   formData.append('eventName', eventName);
   formData.append('caption', caption);
   formData.append('year', year);
@@ -82,14 +84,14 @@ async function submitUpload(e) {
 
   try {
     await apiFetch('/memories', { method: 'POST', body: formData, isForm: true });
-    toast('Photo uploaded successfully.', 'success');
+    toast('Memories uploaded successfully.', 'success');
     document.getElementById('upload-modal').classList.remove('open');
     document.getElementById('upload-form').reset();
     loadGallery();
   } catch (err) {
     toast(err.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = 'Upload Photo';
+    btn.disabled = false; btn.textContent = 'Upload Memories';
   }
 }
 
@@ -99,7 +101,7 @@ async function deletePhoto(id) {
   if (!ok) return;
   try {
     await apiFetch(`/memories/${id}`, { method: 'DELETE' });
-    toast('Photo deleted.', 'success');
+    toast('Memory deleted.', 'success');
     loadGallery();
   } catch (err) {
     toast(err.message, 'error');

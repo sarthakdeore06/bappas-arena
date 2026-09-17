@@ -19,13 +19,16 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+  const allowed = {
+    '.jpg': 'image/', '.jpeg': 'image/', '.png': 'image/', '.webp': 'image/', '.gif': 'image/',
+    '.mp4': 'video/', '.mov': 'video/', '.webm': 'video/',
+  };
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.includes(ext)) cb(null, true);
-  else cb(new Error('Only image files (jpg, jpeg, png, webp, gif) are allowed.'));
+  if (allowed[ext] && file.mimetype.startsWith(allowed[ext])) cb(null, true);
+  else cb(new Error('Only JPG, JPEG, PNG, GIF, MP4, MOV, and WebM files are allowed.'));
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 8 * 1024 * 1024 } });
+const upload = multer({ storage, fileFilter, limits: { fileSize: 100 * 1024 * 1024, files: 20 } });
 
 // @route   GET /api/memories?year=
 router.get('/', async (req, res, next) => {
@@ -40,20 +43,21 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// @route   POST /api/memories  (admin only) - multipart form-data: photo, caption, eventName, year
-router.post('/', protect, upload.single('photo'), async (req, res, next) => {
+// @route   POST /api/memories  (admin only) - multipart form-data: media[], caption, eventName, year
+router.post('/', protect, upload.array('media', 20), async (req, res, next) => {
   try {
-    if (!req.file) return res.status(400).json({ message: 'Please choose a photo to upload.' });
+    if (!req.files || !req.files.length) return res.status(400).json({ message: 'Please choose at least one photo or video to upload.' });
     const { caption, eventName, year } = req.body;
     if (!year) return res.status(400).json({ message: 'Festival year is required.' });
 
-    const memory = await Memory.create({
-      imageUrl: `/uploads/memories/${req.file.filename}`,
+    const memories = await Memory.create(req.files.map((file) => ({
+      imageUrl: `/uploads/memories/${file.filename}`,
+      mediaType: file.mimetype.startsWith('video/') ? 'video' : 'image',
       caption,
       eventName,
       year,
-    });
-    res.status(201).json(memory);
+    })));
+    res.status(201).json(memories);
   } catch (err) {
     next(err);
   }
