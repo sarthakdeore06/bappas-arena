@@ -45,7 +45,8 @@ async function loadResultsForGame(gameId) {
 
   tableWrap.innerHTML = loaderHTML();
   try {
-    currentGameResults = await apiFetch(`/results/game/${gameId}`);
+    const results = await apiFetch(`/results/game/${gameId}`);
+    currentGameResults = results.filter((result) => typeof result.winnerName === 'string' && result.winnerName.trim());
     renderPodium(currentGameResults);
     renderResultsTable(currentGameResults);
   } catch (err) {
@@ -55,11 +56,6 @@ async function loadResultsForGame(gameId) {
 
 function renderPodium(results) {
   const podiumWrap = document.getElementById('podium-wrap');
-  if (!results.length) {
-    podiumWrap.innerHTML = '';
-    return;
-  }
-
   const gameName = document.getElementById('game-select').selectedOptions[0]?.text || '';
   const groups = ['Children', 'Teenage', 'Adult'];
   const medals = { Gold: ['gold', '🥇'], Silver: ['silver', '🥈'], Bronze: ['bronze', '🥉'] };
@@ -70,7 +66,9 @@ function renderPodium(results) {
       <h3 style="margin-bottom:0;">${gameName}</h3>
       ${groups.map((group) => {
         const groupResults = results.filter((r) => r.ageGroup === group);
-        if (!groupResults.length) return '';
+        if (!groupResults.length) {
+          return `<h4 style="margin:24px 0 4px;">${group} Group</h4><p>Winners will be announced soon.</p>`;
+        }
         return `<h4 style="margin:24px 0 4px;">${group} Group</h4><div class="podium">${['Silver', 'Gold', 'Bronze'].map((medal) => {
           const result = groupResults.find((r) => r.position === medal);
           return result ? podiumItem(result, medals[medal][0], medals[medal][1]) : '';
@@ -84,7 +82,7 @@ function podiumItem(result, cls, emoji) {
     <div class="podium-item ${cls}">
       <div class="podium-avatar">${emoji}</div>
       <div class="podium-bar">
-        <div class="podium-name">${result.participant ? result.participant.name : '—'}</div>
+        <div class="podium-name">${result.winnerName.trim()}</div>
         <div class="podium-score">Score: ${result.score}</div>
       </div>
     </div>`;
