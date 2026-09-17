@@ -34,7 +34,6 @@ router.get('/overall', async (req, res, next) => {
           _id: '$participant',
           name: { $first: '$participantInfo.name' },
           category: { $first: '$participantInfo.category' },
-          age: { $first: '$participantInfo.age' },
           totalGames: { $sum: 1 },
           gold: { $sum: { $cond: [{ $eq: ['$position', 'Gold'] }, 1, 0] } },
           silver: { $sum: { $cond: [{ $eq: ['$position', 'Silver'] }, 1, 0] } },

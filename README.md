@@ -12,7 +12,7 @@ Built with **plain HTML, CSS and vanilla JavaScript** on the frontend, and **Nod
 
 - **Premium Ganapati theme** — saffron / gold / cream / dark maroon palette, glassmorphism cards, mandala rings, floating diyas and particles, fully mobile-first responsive.
 - **Dashboard** — total participants, total games, completed competitions, total winners, current festival year.
-- **Participant management** — add / edit / search / delete, age categories (Children: 0-12, Teenagers: 13-17, Adults: 18+), participant profile with full game history.
+- **Participant management** — add / edit / search / delete, categories (Children, Teenage, Adult), participant profile with full game history.
 - **Game management** — name, category, date, time, venue, status (Upcoming / Ongoing / Completed).
 - **Result management** — score, rank, remarks; Gold/Silver/Bronze auto-assigned from rank; duplicate results for the same participant+game are blocked.
 - **Leaderboards** — game-wise and overall, filterable by category and year, with a podium view.
@@ -154,7 +154,7 @@ npm run dev
 
 | Model | Key Fields |
 |---|---|
-| **Participant** | name, age, category (Children/Teenagers/Adults), contactName, contactPhone, year, notes |
+| **Participant** | name, category (Children/Teenage/Adult), contactName, contactPhone, year, notes |
 | **Game** | name, category, date, time, venue, status (Upcoming/Ongoing/Completed), year, description |
 | **Result** | game (ref), participant (ref), score, rank, position (Gold/Silver/Bronze/Participant — auto-assigned), remarks, year. A unique index on `(game, participant)` prevents duplicate results. |
 | **Admin** | username, password (hashed with bcrypt), name |

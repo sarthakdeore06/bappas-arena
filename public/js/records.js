@@ -60,8 +60,8 @@ function renderTabContent() {
     const list = currentRecord.participants;
     wrap.innerHTML = !list.length ? emptyStateHTML('🧑‍🤝‍🧑', 'No participants recorded', 'No participants were registered for this festival year.') : `
       <div class="table-wrap"><table>
-        <thead><tr><th>Name</th><th>Age</th><th>Category</th><th>Contact/Guardian</th></tr></thead>
-        <tbody>${list.map((p) => `<tr><td>${p.name}</td><td>${p.age}</td><td>${badgeForCategory(p.category)}</td><td>${p.contactName}</td></tr>`).join('')}</tbody>
+        <thead><tr><th>Name</th><th>Category</th><th>Contact/Guardian</th></tr></thead>
+        <tbody>${list.map((p) => `<tr><td>${p.name}</td><td>${badgeForCategory(p.category)}</td><td>${p.contactName}</td></tr>`).join('')}</tbody>
       </table></div>`;
   } else if (activeTab === 'games') {
     const list = currentRecord.games;

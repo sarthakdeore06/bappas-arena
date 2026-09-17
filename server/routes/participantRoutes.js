@@ -3,7 +3,6 @@ const Participant = require('../models/Participant');
 const Result = require('../models/Result');
 const Game = require('../models/Game');
 const { protect } = require('../middleware/authMiddleware');
-const { isAgeEligible } = require('../utils/categories');
 
 const router = express.Router();
 
@@ -42,15 +41,12 @@ router.get('/:id', async (req, res, next) => {
 // @route   POST /api/participants  (admin only)
 router.post('/', protect, async (req, res, next) => {
   try {
-    const { name, age, category, contactName, contactPhone, year, notes } = req.body;
-    if (!name || age === undefined || age === null || age === '' || !category || !contactName || !year) {
+    const { name, category, contactName, contactPhone, year, notes } = req.body;
+    if (!name || !category || !contactName || !year) {
       return res.status(400).json({ message: 'Please fill all required fields.' });
     }
-    if (!isAgeEligible(category, Number(age))) {
-      return res.status(400).json({ message: 'Age does not match the selected category.' });
-    }
     const participant = await Participant.create({
-      name, age, category, contactName, contactPhone, year, notes,
+      name, category, contactName, contactPhone, year, notes,
     });
     res.status(201).json(participant);
   } catch (err) {
@@ -63,11 +59,6 @@ router.put('/:id', protect, async (req, res, next) => {
   try {
     const currentParticipant = await Participant.findById(req.params.id);
     if (!currentParticipant) return res.status(404).json({ message: 'Participant not found.' });
-    const category = req.body.category || currentParticipant.category;
-    const age = req.body.age === undefined ? currentParticipant.age : Number(req.body.age);
-    if (!isAgeEligible(category, age)) {
-      return res.status(400).json({ message: 'Age does not match the selected category.' });
-    }
     const participant = await Participant.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

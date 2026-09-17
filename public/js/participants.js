@@ -74,14 +74,13 @@ function renderParticipants(list) {
       <table>
         <thead>
           <tr>
-            <th>Name</th><th>Age</th><th>Category</th><th>Contact / Guardian</th><th>Year</th><th class="admin-only">Actions</th>
+            <th>Name</th><th>Category</th><th>Contact / Guardian</th><th>Year</th><th class="admin-only">Actions</th>
           </tr>
         </thead>
         <tbody>
           ${list.map((p) => `
             <tr>
               <td><a href="#" class="view-profile" data-id="${p._id}" style="color:var(--gold-300); font-weight:600;">${p.name}</a></td>
-              <td>${p.age}</td>
               <td>${badgeForCategory(p.category)}</td>
               <td>${p.contactName}${p.contactPhone ? ' · ' + p.contactPhone : ''}</td>
               <td>${p.year}</td>
@@ -112,7 +111,6 @@ function openParticipantModal(p) {
   document.getElementById('participant-modal-title').textContent = p ? 'Edit Participant' : 'Add Participant';
   document.getElementById('participant-id').value = p ? p._id : '';
   document.getElementById('p-name').value = p ? p.name : '';
-  document.getElementById('p-age').value = p ? p.age : '';
   document.getElementById('p-category').value = p ? p.category : '';
   document.getElementById('p-contact-name').value = p ? p.contactName : '';
   document.getElementById('p-contact-phone').value = p ? (p.contactPhone || '') : '';
@@ -130,7 +128,6 @@ async function submitParticipantForm(e) {
   e.preventDefault();
   const id = document.getElementById('participant-id').value;
   const name = document.getElementById('p-name').value.trim();
-  const age = document.getElementById('p-age').value;
   const category = document.getElementById('p-category').value;
   const contactName = document.getElementById('p-contact-name').value.trim();
   const contactPhone = document.getElementById('p-contact-phone').value.trim();
@@ -140,14 +137,11 @@ async function submitParticipantForm(e) {
   let valid = true;
   const setErr = (fieldId, isErr) => document.getElementById(fieldId).closest('.form-group').classList.toggle('has-error', isErr);
   setErr('p-name', !name); if (!name) valid = false;
-  const ageRange = categoryAgeRanges[category];
-  const invalidAge = !age || !ageRange || Number(age) < ageRange.min || Number(age) > ageRange.max;
-  setErr('p-age', invalidAge); if (invalidAge) valid = false;
   setErr('p-category', !category); if (!category) valid = false;
   setErr('p-contact-name', !contactName); if (!contactName) valid = false;
   if (!valid) { toast('Please fix the highlighted fields.', 'error'); return; }
 
-  const payload = { name, age: Number(age), category, contactName, contactPhone, year: Number(year), notes };
+  const payload = { name, category, contactName, contactPhone, year: Number(year), notes };
   const btn = document.getElementById('participant-submit-btn');
   btn.disabled = true; btn.textContent = 'Saving...';
 
@@ -202,7 +196,6 @@ async function openProfile(id) {
 
     content.innerHTML = `
       <div class="grid grid-3" style="margin-bottom:20px;">
-        <div class="glass-card info-card"><div class="stat-icon">🎂</div><div class="stat-value" style="font-size:1.4rem;">${participant.age}</div><div class="stat-label">Age</div></div>
         <div class="glass-card info-card">${badgeForCategory(participant.category)}<div class="stat-label" style="margin-top:8px;">Category</div></div>
         <div class="glass-card info-card"><div class="stat-icon">🥇${medalCount.Gold} 🥈${medalCount.Silver} 🥉${medalCount.Bronze}</div><div class="stat-label">Medals Won</div></div>
       </div>
@@ -226,7 +219,6 @@ async function openProfile(id) {
 function exportParticipantsCSV() {
   exportToCSV('participants.csv', allParticipants, [
     { label: 'Name', value: (r) => r.name },
-    { label: 'Age', value: (r) => r.age },
     { label: 'Category', value: (r) => r.category },
     { label: 'Contact/Guardian', value: (r) => r.contactName },
     { label: 'Phone', value: (r) => r.contactPhone || '' },

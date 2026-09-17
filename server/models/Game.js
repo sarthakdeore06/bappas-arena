@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { categoryAgeRanges } = require('../utils/categories');
+const { categories } = require('../utils/categories');
 
 const gameSchema = new mongoose.Schema(
   {
@@ -7,7 +7,7 @@ const gameSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: Object.keys(categoryAgeRanges),
+      enum: categories,
     },
     date: { type: Date, required: true },
     time: { type: String, required: true },

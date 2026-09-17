@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('category-filter').addEventListener('change', loadGames);
   document.getElementById('status-filter').addEventListener('change', loadGames);
   document.getElementById('year-filter').addEventListener('change', loadGames);
-  document.getElementById('g-category').addEventListener('change', updateGameEligibilityHint);
 
   document.getElementById('add-game-btn').addEventListener('click', () => {
     if (!requireAdmin()) return;
@@ -109,17 +108,8 @@ function openGameModal(g) {
   document.getElementById('g-venue').value = g ? g.venue : '';
   document.getElementById('g-year').value = g ? g.year : (document.getElementById('year-filter').value || currentYearG);
   document.getElementById('g-description').value = g ? (g.description || '') : '';
-  updateGameEligibilityHint();
   document.querySelectorAll('#game-form .form-group').forEach((el) => el.classList.remove('has-error'));
   document.getElementById('game-modal').classList.add('open');
-}
-
-function updateGameEligibilityHint() {
-  const category = document.getElementById('g-category').value;
-  const range = categoryAgeRanges[category];
-  document.getElementById('game-eligibility-hint').textContent = range
-    ? `Eligible participants: ${category} (${range.label}).`
-    : 'Choose the age group eligible for this game.';
 }
 
 async function submitGameForm(e) {

@@ -3,7 +3,6 @@ const Result = require('../models/Result');
 const Game = require('../models/Game');
 const Participant = require('../models/Participant');
 const { protect } = require('../middleware/authMiddleware');
-const { isAgeEligible } = require('../utils/categories');
 
 const router = express.Router();
 
@@ -26,7 +25,7 @@ router.get('/', async (req, res, next) => {
 
     const results = await Result.find(filter)
       .populate('game', 'name category date venue status year')
-      .populate('participant', 'name age category')
+      .populate('participant', 'name category')
       .sort({ rank: 1 });
     res.json(results);
   } catch (err) {
@@ -38,7 +37,7 @@ router.get('/', async (req, res, next) => {
 router.get('/game/:gameId', async (req, res, next) => {
   try {
     const results = await Result.find({ game: req.params.gameId })
-      .populate('participant', 'name age category')
+      .populate('participant', 'name category')
       .sort({ rank: 1 });
     res.json(results);
   } catch (err) {
@@ -59,7 +58,7 @@ router.post('/', protect, async (req, res, next) => {
 
     const participantDoc = await Participant.findById(participant);
     if (!participantDoc) return res.status(404).json({ message: 'Selected participant does not exist.' });
-    if (gameDoc.category !== participantDoc.category || !isAgeEligible(gameDoc.category, participantDoc.age)) {
+    if (gameDoc.category !== participantDoc.category) {
       return res.status(400).json({ message: 'This participant is not eligible for the selected game category.' });
     }
 
@@ -81,7 +80,7 @@ router.post('/', protect, async (req, res, next) => {
 
     const populated = await result.populate([
       { path: 'game', select: 'name category date venue status year' },
-      { path: 'participant', select: 'name age category' },
+      { path: 'participant', select: 'name category' },
     ]);
 
     res.status(201).json(populated);
@@ -104,7 +103,7 @@ router.put('/:id', protect, async (req, res, next) => {
       runValidators: true,
     }).populate([
       { path: 'game', select: 'name category date venue status year' },
-      { path: 'participant', select: 'name age category' },
+      { path: 'participant', select: 'name category' },
     ]);
     if (!result) return res.status(404).json({ message: 'Result not found.' });
     res.json(result);

@@ -43,12 +43,11 @@ async function loadParticipantsForSelect() {
 function updateParticipantOptions(gameId) {
   const game = allGamesR.find((g) => g._id === gameId);
   const eligible = game ? allParticipantsR.filter((p) => p.category === game.category) : [];
-  const range = game ? categoryAgeRanges[game.category] : null;
   document.getElementById('r-participant').innerHTML =
     `<option value="">Select participant</option>` +
-    eligible.map((p) => `<option value="${p._id}">${p.name} (${p.age})</option>`).join('');
-  document.getElementById('result-eligibility-hint').textContent = range
-    ? `Eligible participants: ${game.category} (${range.label}).`
+    eligible.map((p) => `<option value="${p._id}">${p.name}</option>`).join('');
+  document.getElementById('result-eligibility-hint').textContent = game
+    ? `Eligible participants: ${game.category}.`
     : 'Select a game to show eligible participants.';
 }
 
