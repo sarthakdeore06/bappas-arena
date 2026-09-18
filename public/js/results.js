@@ -4,6 +4,7 @@ let currentGameResults = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadGamesForSelect();
+  await loadResultsForGame('all');
 
   document.getElementById('game-select').addEventListener('change', (e) => {
     loadResultsForGame(e.target.value);
@@ -21,7 +22,7 @@ async function loadGamesForSelect() {
   try {
     allGamesR = await apiFetch('/games');
     const options = allGamesR.map((g) => `<option value="${g._id}">${g.name} (${g.category}, ${formatDate(g.date)})</option>`).join('');
-    document.getElementById('game-select').innerHTML = `<option value="">Select a game...</option>${options}`;
+    document.getElementById('game-select').innerHTML = `<option value="all">All Games</option>${options}`;
     document.getElementById('r-game').innerHTML = `<option value="">Select game</option>${options}`;
   } catch (err) {
     toast('Could not load games: ' + err.message, 'error');
@@ -43,20 +44,26 @@ async function loadResultsForGame(gameId) {
 
   tableWrap.innerHTML = loaderHTML();
   try {
-    const results = await apiFetch(`/results/game/${gameId}`);
+    const results = await apiFetch(gameId === 'all' ? '/results' : `/results/game/${gameId}`);
     currentGameResults = results.filter((result) => typeof result.winnerName === 'string' && result.winnerName.trim());
-    renderResultsTable(currentGameResults);
+    renderResultsTable(currentGameResults, gameId === 'all');
   } catch (err) {
     tableWrap.innerHTML = emptyStateHTML('⚠️', 'Could not load results', err.message);
   }
 }
 
-function renderResultsTable(results) {
+function renderResultsTable(results, isAllGames = false) {
   const tableWrap = document.getElementById('results-table-wrap');
   if (!results.length) {
-    tableWrap.innerHTML = emptyStateHTML('📝', 'No results yet for this game', 'Add the first result using the button above.');
+    tableWrap.innerHTML = emptyStateHTML('📝', isAllGames ? 'No results recorded yet' : 'No results yet for this game', 'Add the first result using the button above.');
     return;
   }
+
+  if (isAllGames) {
+    renderOverallResultsTable(results);
+    return;
+  }
+
   tableWrap.innerHTML = `
     <div class="table-wrap">
       <table>
@@ -85,6 +92,40 @@ function renderResultsTable(results) {
     openResultModal(r);
   }));
   tableWrap.querySelectorAll('.delete-result-btn').forEach((el) => el.addEventListener('click', () => deleteResult(el.dataset.id)));
+}
+
+function renderOverallResultsTable(results) {
+  const pointsByPosition = { Gold: 5, Silver: 3, Bronze: 1 };
+  const players = new Map();
+
+  results.forEach((result) => {
+    const key = result.winnerName.trim().toLowerCase();
+    const player = players.get(key) || { name: result.winnerName.trim(), gold: 0, silver: 0, bronze: 0, points: 0 };
+    const medal = result.position.toLowerCase();
+    player[medal] += 1;
+    player.points += pointsByPosition[result.position] || 0;
+    players.set(key, player);
+  });
+
+  const totals = Array.from(players.values()).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+  document.getElementById('results-table-wrap').innerHTML = `
+    <div class="section-desc" style="margin-bottom:14px;">🥇 Gold = 5 points &nbsp; 🥈 Silver = 3 points &nbsp; 🥉 Bronze = 1 point</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Points</th></tr></thead>
+        <tbody>
+          ${totals.map((player, index) => `
+            <tr>
+              <td>${index + 1}</td>
+              <td style="font-weight:600;">${player.name}</td>
+              <td>${player.gold}</td>
+              <td>${player.silver}</td>
+              <td>${player.bronze}</td>
+              <td style="color:var(--gold-300); font-weight:700;">${player.points}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 function openResultModal(r) {
