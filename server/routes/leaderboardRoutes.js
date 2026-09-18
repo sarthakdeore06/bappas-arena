@@ -21,19 +21,26 @@ router.get('/overall', async (req, res, next) => {
           as: 'participantInfo',
         },
       },
-      { $unwind: '$participantInfo' },
+      { $unwind: { path: '$participantInfo', preserveNullAndEmptyArrays: true } },
     ];
 
     if (category && category !== 'All') {
-      pipeline.push({ $match: { 'participantInfo.category': category } });
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'participantInfo.category': category },
+            { ageGroup: category },
+          ],
+        },
+      });
     }
 
     pipeline.push(
       {
         $group: {
-          _id: '$participant',
-          name: { $first: '$participantInfo.name' },
-          category: { $first: '$participantInfo.category' },
+          _id: { $ifNull: ['$participant', '$winnerName'] },
+          name: { $first: { $ifNull: ['$participantInfo.name', '$winnerName'] } },
+          category: { $first: { $ifNull: ['$participantInfo.category', '$ageGroup'] } },
           totalGames: { $sum: 1 },
           gold: { $sum: { $cond: [{ $eq: ['$position', 'Gold'] }, 1, 0] } },
           silver: { $sum: { $cond: [{ $eq: ['$position', 'Silver'] }, 1, 0] } },
